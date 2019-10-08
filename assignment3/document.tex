@@ -5,6 +5,8 @@
 \usepackage{amsmath}
 \pagestyle{plain}
 \usepackage{fontspec}
+\usepackage{graphicx}  
+\usepackage{epstopdf}
 \CTEXsetup[format={\Large\bfseries}]{section}
 \lstset{language=Matlab}%代码语言使用的是matlab
 \lstset{breaklines}%自动将长的代码行换行排版
@@ -83,9 +85,7 @@ As shown above, the number of iterations is 10896 which varies slightly with the
 \section{Gauss–Seidel  Method}
    This chapter uses the Gauss–Seidel method method and the SOR method to solve the problems in the previous chapter.
    
-   The Matlab code are below:
-   \begin{itemize}
-   	\item[(a)]
+Gauss–Seidel method:
    \begin{centering}
    	\begin{lstlisting}
    	n=100;
@@ -98,7 +98,7 @@ As shown above, the number of iterations is 10896 which varies slightly with the
    	e = ones(n,1);
    	n2=n/2;
    	a = spdiags([e 2*e e],-1:1,n,n);    
-   	b=zeros(n,1);                          r.h.s. b
+   	b=zeros(n,1);                         
    	b(1)=1;b(n)=-1;
    	end
    	function [x2,cout]=seidel(A,b)
@@ -127,7 +127,8 @@ As shown above, the number of iterations is 10896 which varies slightly with the
    	end
    	
    	\end{lstlisting}   \end{centering}
-   \item[(b)]
+   
+ SOR method:
    \begin{centering}
    	\begin{lstlisting}
    	n=100;
@@ -169,7 +170,7 @@ As shown above, the number of iterations is 10896 which varies slightly with the
    	
    	end
    	\end{lstlisting}   \end{centering}
-\end{itemize}
+
 The Seidel method output is:
 \begin{align*}
 \begin{split}
@@ -186,4 +187,91 @@ The SOR output is:
 \end{align*}
 
 As shown above, These methods can converge faster and get Higher precision than Jacobi method.
+\section{Cojugate Method}
+The problems to be solved in this section are below:
+
+Let A be the n × n matrix with n = 1000 and entries
+$A(i, i) = i,A(i, i + 1) = A(i + 1, i) = 1/2,A(i, i + 2) = A(i + 2, i) = 1/2$ for all\quad $i$ that fit
+within the matrix. (a) Print the nonzero structure spy(A). (b) Let $x_e$ be the vector of n ones.
+Set $b = Ax_e$, and apply the Conjugate Gradient Method, without preconditioner, with the
+Jacobi preconditioner, and with the Gauss–Seidel preconditioner. Compare errors of the three runs in a plot versus step number.
+\begin{centering}
+	\begin{lstlisting}	
+	n=1000;
+	[a,b]=matrixetup(n);
+	xc=ones(n,1);
+	[x1,cout1,be1]=conjugate(a,b);
+	dd=diag(diag(a));
+	a=dd\a;
+	b=dd\b;
+	[x2,cout2,be2]=jacobi(a,b,xc);
+	[x3,cout3,be3]=guaseidel(a,b,xc);
+	t=1:100;
+	figure();
+	plot(t,be1,'-o',t,be2,'-h',t,be3,'-s')
+	semilogy(t,be1,'-o',t,be2,'-h',t,be3,'-s')
+	legend('conjugate','Prejacobi','PregaussSeidel');
+	
+	
+	function [a,b] = matrixetup(n)
+	v=(1:1:n);
+	a=diag(v);
+	for i=1:n-2
+	a(i,i+1)=1/2;a(i+1,i)=1/2;
+	a(i,i+2)=1/2;a(i+2,i)=1/2;
+	end
+	xe=ones(n,1);                         
+	b=a*xe;
+	end
+	
+	function [x,t,be]=jacobi(a,c,xc)
+	D=diag(diag(a));     
+	U=D-triu(a);
+	L=-tril(a,-1);
+	for t=1:100
+	x=inv(D)*(U+L)*xc+inv(D)*c; 
+	be(t)=norm(x-xc,'inf');
+	end
+	end
+	function [x,t,be] = guaseidel(a,b,xc)
+	D=diag(diag(a));
+	L = -tril(a,-1);
+	U = -triu(a,1);
+	G = (D-L)\U;
+	f = (D-L)\b;
+	x0=(rand(1,size(a,1)))';
+	x = G*x0+f;
+	for t=1:100
+	be(t)=norm(x-xc,'inf');
+	x0 = x;
+	x = G*x0+f;
+	end
+	end
+	function [x,t,be]=conjugate(a,b)
+	n=length(b);
+	xc=ones(n,1);
+	x=zeros(n,1);
+	r=b-a*x;
+	d=r;
+	for t=1:100
+	G=(norm(r)^2)/(d'*a*d);
+	x=x+G*d;
+	rr=b-a*x;
+	be(t)=norm(x-xc,'inf');
+	B=(norm(rr)^2)/(norm(r)^2);
+	d=rr+B*d;
+	r=rr;
+	end
+	end
+	
+	\end{lstlisting}  
+ \end{centering}
+
+Result is below:
+\begin{figure} [h]
+	\centering  
+	\includegraphics[scale=0.7]{1.jpg}  
+	\caption{Converge Results}  
+	\label{1}  
+\end{figure}  
 \end{document}

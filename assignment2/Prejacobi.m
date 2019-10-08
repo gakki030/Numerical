@@ -1,51 +1,67 @@
-function [x2,cout]=Prejacobi(B,c)
-D=diag(diag(B));
-B=D\B;
-c=D\c;
-U=D-triu(B);
-L=-tril(A,-1);
-x1=(rand(1,size(B,1)))';
-cout=0;
-while 1
- cout=cout+1;
- x2=inv(D)*(U+L)*x1+inv(D)*c;
- t=ones(1,size(B,1));
- t(2:2:size(B,1))=-1;
- t=t';
- t1=x2-x1;
- t2=x2-t;
- if (norm(t1,inf)<10e-3)&&(norm(t2,inf)<10e-3)
- break
+
+n=1000;
+[a,b]=matrixetup(n);
+xc=ones(n,1);
+[x1,cout1,be1]=conjugate(a,b);
+dd=diag(diag(a));
+a=dd\a;
+b=dd\b;
+[x2,cout2,be2]=jacobi(a,b,xc);
+[x3,cout3,be3]=guaseidel(a,b,xc);
+t=1:100;
+figure();
+plot(t,be1,'-o',t,be2,'-h',t,be3,'-s')
+semilogy(t,be1,'-o',t,be2,'-h',t,be3,'-s')
+legend('conjugate','Prejacobi','PregaussSeidel');
+
+
+function [a,b] = matrixetup(n)
+v=(1:1:n);
+a=diag(v);
+for i=1:n-2
+    a(i,i+1)=1/2;a(i+1,i)=1/2;
+    a(i,i+2)=1/2;a(i+2,i)=1/2;
 end
- x1=x2;
+xe=ones(n,1);                         
+b=a*xe;
 end
 
-end
-
-function [x,cout]=PreSeidel(A,b)
-
-D=diag(diag(A));
-L = -tril(A,-1);%求A的下三角矩阵,不带对角线
-U = -triu(A,1);%求A的上三角矩阵
-M = (D-L)/D*(D-U);
-A = M\A;
-b = M\b;
-L = -tril(A,-1);
-U = -triu(A,1);
-G = (D-L)\U;
-f = (D-L)\b;
-x0=(rand(1,size(A,1)))';
-x = G*x0+f;
-cout=0;  %迭代次数
-t=ones(1,size(A,1));
- t(2:2:size(A,1))=-1;
- t=t';
-while 1
-    x0 = x;
-    x = G*x0+f;
-    cout = cout+1;
- if (norm(x-x0,inf)<10e-3)&&(norm(x-t,inf)<10e-3)
-    break
- end
-end
-end
+    function [x,t,be]=jacobi(a,c,xc)
+        D=diag(diag(a));     
+        U=D-triu(a);
+        L=-tril(a,-1);
+        for t=1:100
+            x=inv(D)*(U+L)*xc+inv(D)*c; 
+            be(t)=norm(x-xc,'inf');
+        end
+    end
+function [x,t,be] = guaseidel(a,b,xc)
+ D=diag(diag(a));
+ L = -tril(a,-1);
+ U = -triu(a,1);
+ G = (D-L)\U;
+ f = (D-L)\b;
+ x0=(rand(1,size(a,1)))';
+ x = G*x0+f;
+         for t=1:100
+             be(t)=norm(x-xc,'inf');
+             x0 = x;
+             x = G*x0+f;
+         end
+     end
+    function [x,t,be]=conjugate(a,b)
+        n=length(b);
+        xc=ones(n,1);
+        x=zeros(n,1);
+        r=b-a*x;
+        d=r;
+        for t=1:100
+            G=(norm(r)^2)/(d'*a*d);
+            x=x+G*d;
+            rr=b-a*x;
+            be(t)=norm(x-xc,'inf');
+            B=(norm(rr)^2)/(norm(r)^2);
+            d=rr+B*d;
+            r=rr;
+        end
+    end
