@@ -1,3 +1,4 @@
+
 %Program 3.2.  Polynomial Interpolation Program
 %Click in Matlab figure window to locate data point.
 %     Continue, to add more points.

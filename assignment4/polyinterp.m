@@ -9,4 +9,5 @@ while(k<length(x) && length(x)==length(y))
   y1=nest(k-1,c,x1,x);  % get y coordinates of curve
   y0=nest(k-1,c,x0,x);
   plot(x,y,'bo',x1,y1,x0,y0,'r--o')
+
 end

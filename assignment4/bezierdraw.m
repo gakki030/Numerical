@@ -1,3 +1,4 @@
+
 %Program 3.7 Freehand Draw Program Using Bezier Splines
 %Click in Matlab figure window to locate first point, and click 
 %     three more times to specify 2 control points and the next 
@@ -24,4 +25,3 @@ while(0 == 0)
   plot(xp,yp)               % plot spline curve
   x=x(4);y=y(4);            % promote last to first and repeat
 end
-hold off

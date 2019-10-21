@@ -1,3 +1,4 @@
+
 %Program 3.1 Newton Divided Difference Interpolation Method
 %Computes coefficients of interpolating polynomial
 %Input: x and y are vectors containing the x and y coordinates
